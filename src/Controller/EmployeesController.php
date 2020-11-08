@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EmployeesController extends AbstractController
 {
@@ -77,27 +78,34 @@ class EmployeesController extends AbstractController
      * @Route("api/employees", methods={"POST"}, name="create_employees")
      * @param Request $request
      * @param SerializerInterface $serializer
+     * @param ValidatorInterface $validator
      * @return JsonResponse
      */
-    public function createEmployee(Request $request, SerializerInterface $serializer): JsonResponse
+    public function createEmployee(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         $data = $request->getContent();
         $json = $serializer->deserialize($data, Employee::class, 'json');
+
+        $errors  = $validator->validate($json);
+        if (count($errors) > 0) {
+            return $this->json($errors, 400);
+        }
 
         $response = $this->service->createEmployees($json);
 
         return $this->json($response, 201, []);
     }
 
-
     /**
      * @Route("api/employees/{id}", methods={"PUT"}, name="update_employee")
+     *
      * @param Request $request
      * @param $id
      * @param SerializerInterface $serializer
+     * @param ValidatorInterface $validator
      * @return JsonResponse
      */
-    public function updateEmployee(Request $request, $id, SerializerInterface $serializer): JsonResponse
+    public function updateEmployee(Request $request, $id, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         if ($this->service->showEmployee($id) === null) {
             return $this->json(['message' => "The resource does not exist"], 404, []);
@@ -106,7 +114,12 @@ class EmployeesController extends AbstractController
         $data = $request->getContent();
         $json = $serializer->deserialize($data, Employee::class, 'json');
 
-        $response = $this->service->upateEmployees($json, $id);
+        $errors  = $validator->validate($json);
+        if (count($errors) > 0) {
+            return $this->json($errors, 400);
+        }
+
+        $response = $this->service->updateEmployees($json, $id);
 
         return $this->json($response, 201, []);
     }

@@ -60,42 +60,41 @@ class EmployeeService
     {
         $employees = $this->em->getRepository(Employee::class)->findAll();
 
-        return $this->transformer->transformFromObjects($employees);
+        return ['results' => $this->transformer->transformFromObjects($employees), 'count-employees' => count($employees)];
     }
 
     /**
      * @param $id
-     * @return \App\Dto\EmployeeDto
      */
     public function showEmployee($id)
     {
         $employee = $this->em->getRepository(Employee::class)->find($id);
 
         if ($employee instanceof Employee) {
-            return $this->transformer->transformFromObject($employee);
+            return ['results' => $this->transformer->transformFromObject($employee)];
         }
     }
 
     /**
      * @param $content
-     * @return \App\Dto\EmployeeDto
+     * @return array
      */
-    public function createEmployees($content): EmployeeDto
+    public function createEmployees($content): array
     {
         $content->setUuid(uniqid());
 
         $this->em->persist($content);
         $this->em->flush();
 
-        return $this->transformer->transformFromObject($content);
+        return ['results' => $this->transformer->transformFromObject($content)];
     }
 
 
     /**
      * @param $content
-     * @return \App\Dto\EmployeeDto
+     * @return array
      */
-    public function upateEmployees($content, $id): EmployeeDto
+    public function updateEmployees($content, $id): array
     {
         $employee = $this->em->getRepository(Employee::class)->find($id);
 
@@ -111,7 +110,7 @@ class EmployeeService
         $this->em->flush();
 
         if ($employee instanceof Employee) {
-            return $this->transformer->transformFromObject($employee);
+            return ['results' => $this->transformer->transformFromObject($employee)];
         }
 
     }
