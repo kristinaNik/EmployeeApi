@@ -3,6 +3,7 @@
 
 namespace App\Services;
 
+use App\Dto\EmployeeDto;
 use App\Dto\Transformers\EmployeeResponseTransformer;
 use App\Entity\Employee;
 use Doctrine\ORM\EntityManagerInterface;
@@ -15,12 +16,15 @@ class EmployeeService
      */
     private $em;
 
-
+    /**
+     * @var EmployeeResponseTransformer
+     */
     private $transformer;
 
     /**
-     * EmoloyeeService constructor.
+     * EmployeeService constructor.
      * @param EntityManagerInterface $entityManager
+     * @param EmployeeResponseTransformer $transformer
      */
     public function __construct(EntityManagerInterface $entityManager, EmployeeResponseTransformer $transformer)
     {
@@ -76,9 +80,24 @@ class EmployeeService
      * @param $content
      * @return \App\Dto\EmployeeDto
      */
-    public function createEmployees($content)
+    public function createEmployees($content): EmployeeDto
     {
-        $employee = new Employee();
+        $content->setUuid(uniqid());
+
+        $this->em->persist($content);
+        $this->em->flush();
+
+        return $this->transformer->transformFromObject($content);
+    }
+
+
+    /**
+     * @param $content
+     * @return \App\Dto\EmployeeDto
+     */
+    public function upateEmployees($content, $id): EmployeeDto
+    {
+        $employee = $this->em->getRepository(Employee::class)->find($id);
 
         $employee->setUuid(uniqid());
         $employee->setName($content->getName());
@@ -91,6 +110,20 @@ class EmployeeService
         $this->em->persist($employee);
         $this->em->flush();
 
-        return $this->transformer->transformFromObject($employee);
+        if ($employee instanceof Employee) {
+            return $this->transformer->transformFromObject($employee);
+        }
+
+    }
+
+    /**
+     * @param $id
+     */
+    public function deleteEmployees($id): void
+    {
+        $employee = $this->em->getRepository(Employee::class)->find($id);
+
+        $this->em->remove($employee);
+        $this->em->flush();
     }
 }

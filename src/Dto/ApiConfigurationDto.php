@@ -29,7 +29,12 @@ class ApiConfigurationDto
         $this->password = $password;
     }
 
-    public static function create($username, $password)
+    /**
+     * @param $username
+     * @param $password
+     * @return ApiConfigurationDto
+     */
+    public static function create($username, $password): ApiConfigurationDto
     {
         return new self($username, $password);
     }

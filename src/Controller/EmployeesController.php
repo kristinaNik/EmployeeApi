@@ -13,8 +13,15 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class EmployeesController extends AbstractController
 {
+    /**
+     * @var EmployeeService
+     */
     private $service;
 
+    /**
+     * EmployeesController constructor.
+     * @param EmployeeService $service
+     */
     public function __construct(EmployeeService $service)
     {
         $this->service = $service;
@@ -51,7 +58,7 @@ class EmployeesController extends AbstractController
     }
 
     /**
-     * @Route("api/employee/{id}", methods={"GET"}, name="show_employee")
+     * @Route("api/employees/{id}", methods={"GET"}, name="show_employee")
      * @param $id
      * @return JsonResponse
      */
@@ -72,7 +79,7 @@ class EmployeesController extends AbstractController
      * @param SerializerInterface $serializer
      * @return JsonResponse
      */
-    public function createEmployee(Request $request, SerializerInterface $serializer)
+    public function createEmployee(Request $request, SerializerInterface $serializer): JsonResponse
     {
         $data = $request->getContent();
         $json = $serializer->deserialize($data, Employee::class, 'json');
@@ -82,4 +89,42 @@ class EmployeesController extends AbstractController
         return $this->json($response, 201, []);
     }
 
+
+    /**
+     * @Route("api/employees/{id}", methods={"PUT"}, name="update_employee")
+     * @param Request $request
+     * @param $id
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
+    public function updateEmployee(Request $request, $id, SerializerInterface $serializer): JsonResponse
+    {
+        if ($this->service->showEmployee($id) === null) {
+            return $this->json(['message' => "The resource does not exist"], 404, []);
+        }
+
+        $data = $request->getContent();
+        $json = $serializer->deserialize($data, Employee::class, 'json');
+
+        $response = $this->service->upateEmployees($json, $id);
+
+        return $this->json($response, 201, []);
+    }
+
+    /**
+     * @Route("api/employees/{id}", methods={"DELETE"}, name="delete_employee")
+     * @param Request $request
+     * @param $id
+     * @return JsonResponse
+     */
+    public function deleteEmployee(Request $request, $id): JsonResponse
+    {
+        if ($this->service->showEmployee($id) === null) {
+            return $this->json(['message' => "The resource does not exist"], 404, []);
+        }
+
+        $this->service->deleteEmployees($id);
+
+        return $this->json(['message' => 'Resource successfully deleted'], 200, []);
+    }
 }
