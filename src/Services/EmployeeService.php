@@ -71,4 +71,26 @@ class EmployeeService
             return $this->transformer->transformFromObject($employee);
         }
     }
+
+    /**
+     * @param $content
+     * @return \App\Dto\EmployeeDto
+     */
+    public function createEmployees($content)
+    {
+        $employee = new Employee();
+
+        $employee->setUuid(uniqid());
+        $employee->setName($content->getName());
+        $employee->setTitle($content->getTitle());
+        $employee->setBio($content->getBio());
+        $employee->setCompany($content->getCompany());
+        $employee->setAvatar($content->getAvatar());
+        $employee->setCompany($content->getCompany());
+
+        $this->em->persist($employee);
+        $this->em->flush();
+
+        return $this->transformer->transformFromObject($employee);
+    }
 }

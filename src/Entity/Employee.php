@@ -10,6 +10,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Employee
 {
+    use Timestamps;
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

@@ -23,6 +23,8 @@ class EmployeeResponseTransformer extends AbstractResponseDtoTransformer
         $dto->name = $employee->getName();
         $dto->title = $employee->getTitle();
         $dto->avatar = $employee->getAvatar();
+        $dto->createdAt = $employee->getCreatedAt();
+        $dto->updatedAt = $employee->getUpdatedAt();
 
         return $dto;
     }

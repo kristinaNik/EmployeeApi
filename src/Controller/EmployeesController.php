@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Employee;
 use App\Factories\ClientFactory;
 use App\Services\EmployeeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
@@ -62,6 +64,22 @@ class EmployeesController extends AbstractController
         }
 
         return  $this->json($employee, 200);
+    }
+
+    /**
+     * @Route("api/employees", methods={"POST"}, name="create_employees")
+     * @param Request $request
+     * @param SerializerInterface $serializer
+     * @return JsonResponse
+     */
+    public function createEmployee(Request $request, SerializerInterface $serializer)
+    {
+        $data = $request->getContent();
+        $json = $serializer->deserialize($data, Employee::class, 'json');
+
+        $response = $this->service->createEmployees($json);
+
+        return $this->json($response, 201, []);
     }
 
 }

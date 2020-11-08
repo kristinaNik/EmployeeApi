@@ -43,4 +43,14 @@ class EmployeeDto
      */
     public $avatar;
 
+    /**
+     * @SerializedName("createdAt")
+     */
+    public $createdAt;
+
+    /**
+     * @SerializedName("updatedAt")
+     */
+    public $updatedAt;
+
 }
