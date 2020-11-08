@@ -3,7 +3,6 @@
 
 namespace App\Services;
 
-use App\Dto\EmployeeDto;
 use App\Dto\Transformers\EmployeeResponseTransformer;
 use App\Entity\Employee;
 use Doctrine\ORM\EntityManagerInterface;
@@ -92,6 +91,7 @@ class EmployeeService
 
     /**
      * @param $content
+     * @param $id
      * @return array
      */
     public function updateEmployees($content, $id): array

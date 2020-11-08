@@ -8,7 +8,7 @@ use App\Services\EmployeeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use FOS\RestBundle\Controller\Annotations as Rest;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -29,7 +29,7 @@ class EmployeesController extends AbstractController
     }
 
     /**
-     * @Route("api/save/employees", methods={"POST"}, name="save_employees")
+     * @Rest\Post("/save/employees")
 
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      * @throws \Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface
@@ -37,7 +37,7 @@ class EmployeesController extends AbstractController
      * @throws \Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface
      * @throws \Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface
      */
-    public function saveEmployees(): JsonResponse
+    public function saveAction(): JsonResponse
     {
         $clientFactory= ClientFactory::createClient()->getEmployeeList();
 
@@ -48,10 +48,11 @@ class EmployeesController extends AbstractController
     }
 
     /**
-     * @Route("api/employees", methods={"GET"}, name="get_all_employees")
+     * @Rest\Get("/employees")
+     *
      * @return JsonResponse
      */
-    public function getEmployees(): JsonResponse
+    public function getAction(): JsonResponse
     {
         $employees = $this->service->getAllEmployees();
 
@@ -59,11 +60,12 @@ class EmployeesController extends AbstractController
     }
 
     /**
-     * @Route("api/employees/{id}", methods={"GET"}, name="show_employee")
+     * @Rest\Get("/employees/{id}")
+     *
      * @param $id
      * @return JsonResponse
      */
-    public function showEmployee($id): JsonResponse
+    public function showAction($id): JsonResponse
     {
         $employee = $this->service->showEmployee($id);
 
@@ -75,13 +77,14 @@ class EmployeesController extends AbstractController
     }
 
     /**
-     * @Route("api/employees", methods={"POST"}, name="create_employees")
+     * @Rest\Post("/employees")
+     *
      * @param Request $request
      * @param SerializerInterface $serializer
      * @param ValidatorInterface $validator
      * @return JsonResponse
      */
-    public function createEmployee(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
+    public function postAction(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         $data = $request->getContent();
         $json = $serializer->deserialize($data, Employee::class, 'json');
@@ -97,7 +100,7 @@ class EmployeesController extends AbstractController
     }
 
     /**
-     * @Route("api/employees/{id}", methods={"PUT"}, name="update_employee")
+     * @Rest\Put("/employees/{id}")
      *
      * @param Request $request
      * @param $id
@@ -105,7 +108,7 @@ class EmployeesController extends AbstractController
      * @param ValidatorInterface $validator
      * @return JsonResponse
      */
-    public function updateEmployee(Request $request, $id, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
+    public function updateAction(Request $request, $id, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         if ($this->service->showEmployee($id) === null) {
             return $this->json(['message' => "The resource does not exist"], 404, []);
@@ -125,12 +128,13 @@ class EmployeesController extends AbstractController
     }
 
     /**
-     * @Route("api/employees/{id}", methods={"DELETE"}, name="delete_employee")
+     * @Rest\Delete("/employees/{id}")
+     *
      * @param Request $request
      * @param $id
      * @return JsonResponse
      */
-    public function deleteEmployee(Request $request, $id): JsonResponse
+    public function deleteAction(Request $request, $id): JsonResponse
     {
         if ($this->service->showEmployee($id) === null) {
             return $this->json(['message' => "The resource does not exist"], 404, []);

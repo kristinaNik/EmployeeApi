@@ -11,6 +11,7 @@
         "doctrine/doctrine-bundle": "^2.2",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "doctrine/orm": "^2.7",
+        "friendsofsymfony/rest-bundle": "^3.0",
         "gedmo/doctrine-extensions": "^3.0",
         "phpdocumentor/reflection-docblock": "^5.2",
         "stof/doctrine-extensions-bundle": "^1.5",

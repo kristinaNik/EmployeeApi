@@ -5,6 +5,8 @@
  - copy .env.local file and add .env file
  - Add `DATABASE_URL` in .env for connecting to your database
  - Run `bin/console migrations:migrate`
+ - Run `bin/console debug:router` to see the api routes
+ 
 
 ###API Endpoints
 

@@ -81,6 +81,18 @@
     "doctrine/sql-formatter": {
         "version": "1.1.1"
     },
+    "friendsofsymfony/rest-bundle": {
+        "version": "2.2",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "2.2",
+            "ref": "cad41ef93d6150067ae2bb3c7fd729492dff6f0a"
+        },
+        "files": [
+            "config/packages/fos_rest.yaml"
+        ]
+    },
     "gedmo/doctrine-extensions": {
         "version": "v3.0.0"
     },
@@ -286,6 +298,9 @@
             "config/routes.yaml"
         ]
     },
+    "symfony/security-core": {
+        "version": "v5.1.8"
+    },
     "symfony/serializer": {
         "version": "v5.1.8"
     },
@@ -331,5 +346,11 @@
     },
     "webmozart/assert": {
         "version": "1.9.1"
+    },
+    "willdurand/jsonp-callback-validator": {
+        "version": "v1.1.0"
+    },
+    "willdurand/negotiation": {
+        "version": "v2.3.1"
     }
 }
