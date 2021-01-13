@@ -5,15 +5,17 @@ namespace App\Services;
 
 use App\Dto\Transformers\EmployeeResponseTransformer;
 use App\Entity\Employee;
+use App\Interfaces\EmployeeInterfaceService;
+use App\Repository\EmployeeRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
-class EmployeeService
+class EmployeeService implements EmployeeInterfaceService
 {
 
     /**
-     * @var EntityManagerInterface
+     * @var EmployeeRepository
      */
-    private $em;
+    private $repository;
 
     /**
      * @var EmployeeResponseTransformer
@@ -22,12 +24,13 @@ class EmployeeService
 
     /**
      * EmployeeService constructor.
-     * @param EntityManagerInterface $entityManager
+     *
+     * @param EmployeeRepository $repository
      * @param EmployeeResponseTransformer $transformer
      */
-    public function __construct(EntityManagerInterface $entityManager, EmployeeResponseTransformer $transformer)
+    public function __construct(EmployeeRepository $repository, EmployeeResponseTransformer $transformer)
     {
-        $this->em = $entityManager;
+        $this->repository = $repository;
         $this->transformer = $transformer;
     }
 
@@ -45,8 +48,7 @@ class EmployeeService
             $employee->setBio($content->bio);
             $employee->setCompany($content->company);
             $employee->setAvatar($content->avatar);
-            $this->em->persist($employee);
-            $this->em->flush();
+            $this->repository->saveEmployees($employee);
         }
 
     }
@@ -57,72 +59,72 @@ class EmployeeService
      */
     public function getAllEmployees()
     {
-        $employees = $this->em->getRepository(Employee::class)->findAll();
+        $employees = $this->repository->findAll();
 
         return ['results' => $this->transformer->transformFromObjects($employees), 'count-employees' => count($employees)];
     }
 
     /**
      * @param $id
+     *
+     * @return array
      */
-    public function showEmployee($id)
+    public function showEmployee(int $id): array
     {
-        $employee = $this->em->getRepository(Employee::class)->find($id);
+        $employeeRepo = $this->repository->find($id);
 
-        if ($employee instanceof Employee) {
-            return ['results' => $this->transformer->transformFromObject($employee)];
+        if ($employeeRepo instanceof Employee) {
+            return ['results' => $this->transformer->transformFromObject($employeeRepo)];
         }
     }
 
     /**
-     * @param $content
+     * @param $employee
      * @return array
      */
-    public function createEmployees($content): array
+    public function createEmployees(Employee $employee): array
     {
-        $content->setUuid(uniqid());
-
-        $this->em->persist($content);
-        $this->em->flush();
-
-        return ['results' => $this->transformer->transformFromObject($content)];
-    }
-
-
-    /**
-     * @param $content
-     * @param $id
-     * @return array
-     */
-    public function updateEmployees($content, $id): array
-    {
-        $employee = $this->em->getRepository(Employee::class)->find($id);
-
         $employee->setUuid(uniqid());
-        $employee->setName($content->getName());
-        $employee->setTitle($content->getTitle());
-        $employee->setBio($content->getBio());
-        $employee->setCompany($content->getCompany());
-        $employee->setAvatar($content->getAvatar());
-        $employee->setCompany($content->getCompany());
 
-        $this->em->persist($employee);
-        $this->em->flush();
+        $this->repository->create($employee);
 
-        if ($employee instanceof Employee) {
-            return ['results' => $this->transformer->transformFromObject($employee)];
+        return ['results' => $this->transformer->transformFromObject($employee)];
+    }
+
+
+    /**
+     * @param Employee $employee
+     * @param $id
+     *
+     * @return array
+     */
+    public function updateEmployees(Employee $employee, int $id): array
+    {
+        $employeeRepo = $this->repository->find($id);
+
+        $employeeRepo->setUuid(uniqid());
+        $employeeRepo->setName($employee->getName());
+        $employeeRepo->setTitle($employee->getTitle());
+        $employeeRepo->setBio($employee->getBio());
+        $employeeRepo->setCompany($employee->getCompany());
+        $employeeRepo->setAvatar($employee->getAvatar());
+        $employeeRepo->setCompany($employee->getCompany());
+
+        $this->repository->update($employeeRepo);
+
+        if ($employeeRepo instanceof Employee) {
+            return ['results' => $this->transformer->transformFromObject($employeeRepo)];
         }
 
     }
 
     /**
-     * @param $id
+     * @param int $id
      */
-    public function deleteEmployees($id): void
+    public function deleteEmployees(int $id): void
     {
-        $employee = $this->em->getRepository(Employee::class)->find($id);
+        $employee = $this->repository->find($id);
 
-        $this->em->remove($employee);
-        $this->em->flush();
+        $this->repository->delete($employee);
     }
 }

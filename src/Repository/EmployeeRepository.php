@@ -4,6 +4,10 @@ namespace App\Repository;
 
 use App\Entity\Employee;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Cache\EntityCacheEntry;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,9 +18,12 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class EmployeeRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private $em;
+
+    public function __construct(ManagerRegistry $registry, EntityManagerInterface $em)
     {
         parent::__construct($registry, Employee::class);
+        $this->em = $em;
     }
 
     // /**
@@ -35,6 +42,74 @@ class EmployeeRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    /**
+     * @param $content
+     *
+     * @return bool
+     */
+    public function saveEmployees($content): bool
+    {
+        try {
+            $this->em->persist($content);
+            $this->em->flush();
+
+            return true;
+        } catch (OptimisticLockException $exception) {
+            return false;
+        }
+    }
+
+    /**
+     * @param Employee $employee
+     *
+     * @return bool
+     */
+    public function create(Employee $employee): bool
+    {
+        try {
+            $this->em->persist($employee);
+            $this->em->flush();
+
+            return true;
+        } catch (OptimisticLockException $exception) {
+            return false;
+        }
+    }
+
+    /**
+     * @param Employee $employee
+     *
+     * @return bool
+     */
+    public function update(Employee $employee): bool
+    {
+        try {
+            $this->em->persist($employee);
+            $this->em->flush();
+
+            return true;
+        } catch (OptimisticLockException $exception) {
+            return false;
+        }
+    }
+
+    /**
+     * @param Employee $employee
+     *
+     * @return bool
+     */
+    public function delete(Employee $employee): bool
+    {
+        try {
+            $this->em->remove($employee);
+            $this->em->flush();
+
+            return true;
+        } catch (OptimisticLockException $exception) {
+            return false;
+        }
+    }
 
     /*
     public function findOneBySomeField($value): ?Employee

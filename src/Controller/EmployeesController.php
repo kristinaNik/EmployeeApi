@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Controller\Traits\ValidationTrait;
 use App\Entity\Employee;
 use App\Factories\ClientFactory;
+use App\Interfaces\EmployeeInterfaceService;
 use App\Services\EmployeeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,16 +16,18 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class EmployeesController extends AbstractController
 {
+    use ValidationTrait;
+
     /**
-     * @var EmployeeService
+     * @var EmployeeInterfaceService
      */
     private $service;
 
     /**
      * EmployeesController constructor.
-     * @param EmployeeService $service
+     * @param EmployeeInterfaceService $service
      */
-    public function __construct(EmployeeService $service)
+    public function __construct(EmployeeInterfaceService $service)
     {
         $this->service = $service;
     }
@@ -52,7 +56,7 @@ class EmployeesController extends AbstractController
      *
      * @return JsonResponse
      */
-    public function getAction(): JsonResponse
+    public function getAllAction(): JsonResponse
     {
         $employees = $this->service->getAllEmployees();
 
@@ -62,10 +66,10 @@ class EmployeesController extends AbstractController
     /**
      * @Rest\Get("/employees/{id}")
      *
-     * @param $id
+     * @param int $id
      * @return JsonResponse
      */
-    public function showAction($id): JsonResponse
+    public function showAction(int $id): JsonResponse
     {
         $employee = $this->service->showEmployee($id);
 
@@ -83,18 +87,23 @@ class EmployeesController extends AbstractController
      * @param SerializerInterface $serializer
      * @param ValidatorInterface $validator
      * @return JsonResponse
+     * @throws \Exception
      */
     public function postAction(Request $request, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         $data = $request->getContent();
-        $json = $serializer->deserialize($data, Employee::class, 'json');
+        $employeeResponse = $serializer->deserialize($data, Employee::class, 'json');
 
-        $errors  = $validator->validate($json);
-        if (count($errors) > 0) {
+        $errors  = $validator->validate($employeeResponse);
+        if ($errors->count() > 0) {
             return $this->json($errors, 400);
         }
 
-        $response = $this->service->createEmployees($json);
+        if (!$employeeResponse instanceof Employee) {
+            throw new \Exception("This object does not belong to the given class");
+        }
+
+        $response = $this->service->createEmployees($employeeResponse);
 
         return $this->json($response, 201, []);
     }
@@ -103,26 +112,30 @@ class EmployeesController extends AbstractController
      * @Rest\Put("/employees/{id}")
      *
      * @param Request $request
-     * @param $id
+     * @param int $id
      * @param SerializerInterface $serializer
      * @param ValidatorInterface $validator
      * @return JsonResponse
+     * @throws \Exception
      */
-    public function updateAction(Request $request, $id, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
+    public function updateAction(Request $request, int $id, SerializerInterface $serializer, ValidatorInterface $validator): JsonResponse
     {
         if ($this->service->showEmployee($id) === null) {
             return $this->json(['message' => "The resource does not exist"], 404, []);
         }
 
         $data = $request->getContent();
-        $json = $serializer->deserialize($data, Employee::class, 'json');
-
-        $errors  = $validator->validate($json);
-        if (count($errors) > 0) {
+        $employeeResponse = $serializer->deserialize($data, Employee::class, 'json');
+        $errors  = $validator->validate($employeeResponse);
+        if ($errors->count() > 0) {
             return $this->json($errors, 400);
         }
 
-        $response = $this->service->updateEmployees($json, $id);
+        if (!$employeeResponse instanceof Employee) {
+            throw new \Exception("This object does not belong to the given class");
+        }
+
+        $response = $this->service->updateEmployees($employeeResponse, $id);
 
         return $this->json($response, 201, []);
     }
@@ -131,10 +144,11 @@ class EmployeesController extends AbstractController
      * @Rest\Delete("/employees/{id}")
      *
      * @param Request $request
-     * @param $id
+     * @param int $id
+     *
      * @return JsonResponse
      */
-    public function deleteAction(Request $request, $id): JsonResponse
+    public function deleteAction(Request $request, int $id): JsonResponse
     {
         if ($this->service->showEmployee($id) === null) {
             return $this->json(['message' => "The resource does not exist"], 404, []);
