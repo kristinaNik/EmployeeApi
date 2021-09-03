@@ -48,6 +48,7 @@ class ApiClientService
         $response = $this->client->request('POST', self::API_URL, $options->toArray());
         $content =  $response->getContent();
 
+
         return json_decode($content);
     }
 
